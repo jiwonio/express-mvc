@@ -42,6 +42,9 @@ app.use(session({
 // TODO: Passport
 // app.use(passport.initialize());
 // app.use(passport.session());
+//
+// app.use(authentication);
+// app.use(authorization);
 
 // 4. Logger
 app.use(morgan);
