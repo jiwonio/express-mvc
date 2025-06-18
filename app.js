@@ -5,7 +5,8 @@ const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const helmet = require("helmet");
 const cors = require('cors');
-const { morganMiddleware: morgan, logger } = require("./modules/logger");
+const { morganMiddleware: morgan, logger } = require("./middleware/logger");
+const loader = require("./middleware/loader");
 const { rateLimit } = require('express-rate-limit');
 const { slowDown } = require('express-slow-down');
 const fs = require('fs');
@@ -57,13 +58,7 @@ app.use(rateLimiter);
 app.use(express.static(path.join(__dirname, 'view')));
 
 // 7. Controller
-const controllerPath = path.join(__dirname, 'controller');
-fs.readdirSync(controllerPath)
-    .filter(file => file.endsWith('.js'))
-    .forEach(file => {
-        const route = file === 'index.js' ? '/' : `/${path.basename(file, '.js')}`;
-        app.use(route, require(path.join(controllerPath, file)));
-    });
+loader(path.join(__dirname, 'controller'))(app);
 
 // TODO: -. https or nginx
 //       -. transaction

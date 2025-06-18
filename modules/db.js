@@ -20,7 +20,7 @@ const getPool = () => {
     return pool;
 };
 
-export const db = async (sql, params = []) => {
+const db = async (sql, params = []) => {
     const conn = await getPool().getConnection();
     try {
         const [rows] = await conn.execute(sql, params);
@@ -29,3 +29,5 @@ export const db = async (sql, params = []) => {
         conn.release();
     }
 };
+
+module.exports = { db };
