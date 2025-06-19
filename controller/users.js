@@ -1,13 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { getUsersWithDetails, getTotalCount } = require('../model/users');
+const { getFooBar, getTotalCount, createFoobar } = require('../model/users');
 
-/* GET users listing. */
+/**
+ * GET /
+ */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-// GET /users/sample - 사용자 목록 조회
+/**
+ * GET /users/sample
+ */
 router.get('/sample', async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -16,7 +20,7 @@ router.get('/sample', async (req, res, next) => {
 
     // 함수를 직접 호출
     const [users, total] = await Promise.all([
-      getUsersWithDetails({ limit, offset }),
+      getFooBar({ limit, offset }),
       getTotalCount()
     ]);
 
@@ -37,13 +41,14 @@ router.get('/sample', async (req, res, next) => {
   }
 });
 
-// GET /users/sample/:id - 특정 사용자 상세 조회
+/**
+ * GET /users/sample/:id
+ */
 router.get('/sample/:id', async (req, res, next) => {
   try {
     const userId = parseInt(req.params.id, 10);
 
-    // 단일 사용자 조회
-    const users = await getUsersWithDetails({
+    const users = await getFooBar({
       limit: 1,
       offset: 0,
       userId
@@ -52,7 +57,7 @@ router.get('/sample/:id', async (req, res, next) => {
     if (!users || users.length === 0) {
       return res.status(404).json({
         success: false,
-        message: '사용자를 찾을 수 없습니다.'
+        message: 'Not found.'
       });
     }
 
@@ -65,5 +70,28 @@ router.get('/sample/:id', async (req, res, next) => {
   }
 });
 
+/**
+ * POST /users/sample
+ */
+router.post('/sample', async (req, res, next) => {
+  try {
+    const result = await createFoobar(
+        { message: 'Hello, World!' },
+        { comment: 'Hey, there!' }
+    );
+    console.log('success: ', result);
+    return res.status(404).json({
+      success: true,
+      message: 'success',
+      data: result
+    });
+  } catch (err) {
+    console.error('error: ', err);
+    return res.status(404).json({
+      success: false,
+      message: err.message || 'error'
+    });
+  }
+});
 
 module.exports = router;

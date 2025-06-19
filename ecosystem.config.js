@@ -11,7 +11,7 @@ module.exports = {
       name   : "express-mvc/development",
       script : "./bin/www",
       time   : false,
-      watch  : false,
+      watch  : true,
       ignore_watch : [".*", "node_modules", "logs", "sessions"],
       autorestart: true,
       max_memory_restart : "2G",

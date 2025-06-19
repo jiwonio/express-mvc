@@ -43,7 +43,7 @@ app.use(session({
 // TODO: Passport
 // app.use(passport.initialize());
 // app.use(passport.session());
-//
+// TODO: or custom auth
 // app.use(authentication);
 // app.use(authorization);
 
@@ -60,10 +60,9 @@ app.use(express.static(path.join(__dirname, 'view')));
 // 7. Controller
 loader(path.join(__dirname, 'controller'))(app);
 
-// TODO: -. https or nginx
-//       -. transaction
-//       -. passport
-//       -. cache
+// TODO: - https: nginx
+//       - passport
+//       - cache
 
 // 8. 404 Error
 app.use((req, res, next) => {

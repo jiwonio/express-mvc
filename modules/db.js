@@ -1,17 +1,15 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// TODO: transaction
-
 let pool = null;
 
 const getPool = () => {
     if (!pool) {
         pool = mysql.createPool({
             host: process.env.DB_HOST,
-            user: process.env.DB_USER,
+            database: process.env.DB_NAME,
+            user: process.env.DB_USERNAME,
             password: process.env.DB_PASSWORD,
-            database: process.env.DB_USERNAME,
             connectionLimit: 10,
             waitForConnections: true,
             enableKeepAlive: true
@@ -30,4 +28,20 @@ const db = async (sql, params = []) => {
     }
 };
 
-module.exports = { db };
+const transaction = async (callback) => {
+    const conn = await getPool().getConnection();
+    await conn.beginTransaction();
+
+    try {
+        const result = await callback(conn);
+        await conn.commit();
+        return result;
+    } catch (err) {
+        await conn.rollback();
+        throw err;
+    } finally {
+        conn.release();
+    }
+};
+
+module.exports = { db, transaction };
