@@ -8,7 +8,7 @@ const authentication = (req, res, next) => {
     }
 
     // public path
-    const public_paths = [
+    const publicPaths = [
         '/login',
         '/api/auth/login',
         '/api/auth/logout',
@@ -26,8 +26,23 @@ const authentication = (req, res, next) => {
         return res.redirect(`/`);
     }
 
+    // ip
+    const ip = req.ip ||
+        req.headers['x-forwarded-for'] ||
+        req.headers['x-real-ip'] ||
+        req.connection.remoteAddress;
+
+    // allowed ip
+    const allowedIps = ['*'];
+
     // pass
-    if (public_paths.some(path => urlWithoutQuery.startsWith(path))) {
+    if (publicPaths.some(path =>
+            urlWithoutQuery === '' ||   // /index
+            urlWithoutQuery === '/' ||  // /index/
+            urlWithoutQuery.startsWith(path)
+        ) &&
+        allowedIps.includes('*') ||
+        allowedIps.includes(ip)) {
         return next();
     }
 
