@@ -1,8 +1,9 @@
-// middleware/logger.js
+// modules/logger.js
 const winston = require('winston');
 const winstonDaily = require('winston-daily-rotate-file');
-const morgan = require('morgan');
+const path = require('path');
 
+// logger
 const logger = winston.createLogger({
     format: winston.format.combine(
         winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -34,21 +35,26 @@ const logger = winston.createLogger({
     ]
 });
 
-// morgan ip token
-morgan.token('real-ip', (req) => {
-    return req.ip ||
-        req.headers['x-forwarded-for'] ||
-        req.headers['x-real-ip'] ||
-        req.connection.remoteAddress;
-});
+// create logger with file
+const createLogger = (folder) => {
+    return winston.createLogger({
+        format: winston.format.combine(
+            winston.format.timestamp({
+                format: 'YYYY-MM-DD HH:mm:ss'
+            }),
+            winston.format.printf(info => `[${info.timestamp}] ${info.message}`)
+        ),
+        transports: [
+            new winstonDaily({
+                dirname: path.join(process.cwd(), 'logs', folder),
+                filename: `${folder}_%DATE%.log`,
+                datePattern: 'YYYYMMDD',
+                zippedArchive: true,
+                maxSize: '20m',
+                maxFiles: '14d'
+            })
+        ]
+    });
+}
 
-// morgan session token
-morgan.token('user-id', (req) => {
-    return req.session?.user_id || '-';
-});
-
-const morganMiddleware = morgan(':real-ip [:user-id] :method :url :status :response-time ms', {
-    stream: { write: message => logger.info(message.trim()) }
-});
-
-module.exports = { logger, morganMiddleware };
+module.exports = { logger, createLogger };

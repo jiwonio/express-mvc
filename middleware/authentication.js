@@ -1,6 +1,6 @@
 // middleware/authentication.js
 // TODO: check login
-const { logger } = require("./logger");
+const { logger } = require("../modules/logger");
 
 const authentication = (req, res, next) => {
     if (process.env.NODE_ENV === 'development') {

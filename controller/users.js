@@ -24,16 +24,13 @@ router.get('/sample', async (req, res, next) => {
       getTotalCount()
     ]);
 
-    res.json({
-      success: true,
-      data: {
-        users,
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
-        }
+    res.success('success', {
+      users,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
       }
     });
   } catch (error) {
@@ -61,10 +58,7 @@ router.get('/sample/:id', async (req, res, next) => {
       });
     }
 
-    res.json({
-      success: true,
-      data: users[0]
-    });
+    res.success('success', users[0]);
   } catch (error) {
     next(error);
   }
@@ -80,17 +74,9 @@ router.post('/sample', async (req, res, next) => {
         { comment: 'Hey, there!' }
     );
     console.log('success: ', result);
-    return res.status(404).json({
-      success: true,
-      message: 'success',
-      data: result
-    });
-  } catch (err) {
-    console.error('error: ', err);
-    return res.status(404).json({
-      success: false,
-      message: err.message || 'error'
-    });
+    res.success('success', result);
+  } catch (error) {
+    next(error);
   }
 });
 

@@ -5,16 +5,21 @@ const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const helmet = require("helmet");
 const cors = require('cors');
-const { morganMiddleware: morgan, logger } = require("./middleware/logger");
-const loader = require("./middleware/loader");
+const { accessLogger } = require("./middleware/accessLogger");
+const {logger} = require("./modules/logger");
+const routerLoader = require("./middleware/routerLoader");
 const { rateLimit } = require('express-rate-limit');
 const { slowDown } = require('express-slow-down');
-const fs = require('fs');
+const compression = require("compression");
+const responseHandler = require("./middleware/responseHandler");
 const speedLimiter = slowDown({ windowMs: 15 * 60 * 1000, delayAfter: 50, delayMs: () => 2000 });
 const rateLimiter = rateLimit({ windowMs: 15 * 60 * 1000 /* 15 minutes */, limit: 100 });
 require('dotenv').config();
 
 const app = express();
+
+// 0. Compression
+app.use(compression());
 
 // 1. Security
 app.use(helmet());
@@ -48,38 +53,35 @@ app.use(session({
 // app.use(authorization);
 
 // 4. Logger
-app.use(morgan);
+app.use(accessLogger);
 
 // 5. Limiter
 app.use(speedLimiter);
 app.use(rateLimiter);
 
-// 6. Static
+// 6. Response Handler
+app.use(responseHandler());
+
+// 7. Static
 app.use(express.static(path.join(__dirname, 'view')));
 
-// 7. Controller
-loader(path.join(__dirname, 'controller'))(app);
+// 8. Controller
+routerLoader(path.join(__dirname, 'controller'))(app);
 
 // TODO: - https: nginx
 //       - passport
 //       - cache
 
-// 8. 404 Error
+// 9. 404 Error
 app.use((req, res, next) => {
     logger.error(`404 Not Found: ${req.originalUrl}`);
-    res.status(404).json({
-        success: false,
-        message: '404 Not Found'
-    });
+    res.error('404 Not Found', 404);
 });
 
-// 9. Error
+// 10. Error
 app.use((err, req, res, next) => {
     logger.error(err?.stack);
-    res.status(err?.statusCode || 500).json({
-        success: false,
-        message: err?.message || 'Internal Server Error'
-    });
+    res.error(err?.message || 'Internal Server Error', err?.statusCode || 500);
 });
 
 module.exports = app;

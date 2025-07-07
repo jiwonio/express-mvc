@@ -1,7 +1,26 @@
 const mysql = require('mysql2/promise');
+const {createLogger} = require("./logger");
 require('dotenv').config();
 
 let pool = null;
+
+// logging - !SELECT
+const logQuery = (query, params) => {
+    if (!query.trim().toUpperCase().startsWith('SELECT')) {
+        createLogger('query').info(mysql.format(query, params));
+    }
+};
+
+// connection wrapper
+const wrapConnection = (conn) => {
+    const originalExecute = conn.execute.bind(conn);
+    conn.execute = async (...args) => {
+        const [query, params] = args;
+        logQuery(query, params);
+        return originalExecute(...args);
+    };
+    return conn;
+};
 
 const getPool = () => {
     if (!pool) {
@@ -14,6 +33,17 @@ const getPool = () => {
             waitForConnections: true,
             enableKeepAlive: true
         });
+
+        // query logging
+        const originalQuery = pool.query.bind(pool);
+        pool.query = async (...args) => {
+            const [query, params] = args;
+
+            // logging - !SELECT
+            logQuery(query, params);
+
+            return originalQuery(...args);
+        };
     }
     return pool;
 };
@@ -30,17 +60,18 @@ const db = async (sql, params = []) => {
 
 const transaction = async (callback) => {
     const conn = await getPool().getConnection();
-    await conn.beginTransaction();
+    const wrappedConn = wrapConnection(conn);
+    await wrappedConn.beginTransaction();
 
     try {
-        const result = await callback(conn);
-        await conn.commit();
+        const result = await callback(wrappedConn);
+        await wrappedConn.commit();
         return result;
     } catch (err) {
-        await conn.rollback();
+        await wrappedConn.rollback();
         throw err;
     } finally {
-        conn.release();
+        wrappedConn.release();
     }
 };
 

@@ -2,7 +2,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const { logger } = require('./logger');
+const { logger } = require('../modules/logger');
 
 // Route registration function is isolated into a separate module
 const registerRoute = (app, fullPath, cleanRoute) => {
@@ -20,7 +20,7 @@ const registerRoute = (app, fullPath, cleanRoute) => {
 };
 
 // Higher-order function expressed as an arrow function
-const loader = (controllerPath) => (app) => {
+const routerLoader = (controllerPath) => (app) => {
     const processDirectory = (dir, baseRoute = '') => {
         fs.readdirSync(dir).forEach(file => {
             const fullPath = path.join(dir, file);
@@ -43,4 +43,4 @@ const loader = (controllerPath) => (app) => {
     return app;
 };
 
-module.exports = loader;
+module.exports = routerLoader;

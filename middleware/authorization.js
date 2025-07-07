@@ -1,6 +1,6 @@
 // middleware/authorization.js
 // TODO: check permission
-const { logger } = require("./logger");
+const { logger } = require("../modules/logger");
 
 const authorization = (req, res, next) => {
     next();
