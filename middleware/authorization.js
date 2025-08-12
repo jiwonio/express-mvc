@@ -3,7 +3,7 @@
 const { logger } = require("../modules/logger");
 
 const authorization = (req, res, next) => {
-    next();
+  next();
 };
 
 module.exports = { authorization };

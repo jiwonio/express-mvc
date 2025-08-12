@@ -70,8 +70,8 @@ router.get('/sample/:id', async (req, res, next) => {
 router.post('/sample', async (req, res, next) => {
   try {
     const result = await createFoobar(
-        { message: 'Hello, World!' },
-        { comment: 'Hey, there!' }
+      { message: 'Hello, World!' },
+      { comment: 'Hey, there!' }
     );
     console.log('success: ', result);
     res.success('success', result);

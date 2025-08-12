@@ -32,17 +32,17 @@ app.use(cookieParser());
 
 // 3. Session
 app.use(session({
-    store: new FileStore({
-        retries: 0,
-        ttl: 12 * 60 * 60, // 12 hours
-    }),
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: false,
-        maxAge: 60 * 60 * 1000 * 12, // 12 hours
-    }
+  store: new FileStore({
+    retries: 0,
+    ttl: 12 * 60 * 60, // 12 hours
+  }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: false,
+    maxAge: 60 * 60 * 1000 * 12, // 12 hours
+  }
 }));
 
 // TODO: Passport
@@ -74,14 +74,14 @@ routerLoader(path.join(__dirname, 'controller'))(app);
 
 // 9. 404 Error
 app.use((req, res, next) => {
-    logger.error(`404 Not Found: ${req.originalUrl}`);
-    res.error('404 Not Found', 404);
+  logger.error(`404 Not Found: ${req.originalUrl}`);
+  res.error('404 Not Found', 404);
 });
 
 // 10. Error
 app.use((err, req, res, next) => {
-    logger.error(err?.stack);
-    res.error(err?.message || 'Internal Server Error', err?.statusCode || 500);
+  logger.error(err?.stack);
+  res.error(err?.message || 'Internal Server Error', err?.statusCode || 500);
 });
 
 module.exports = app;
